@@ -77,3 +77,40 @@ server {
 </VirtualHost>
 ```
 
+## Config Step By Step
+
+### Install JDK
+* download jdk
+* unzip using ```tar -xvf jdk*.tar.gz```
+* add jdk to path
+  * ```nano ~/.bashrc```
+  * export PATH="$HOME/tools/jdk1.8.0_131/bin:$PATH"
+  * export JAVA_HOME="$HOME/tools/jdk1.8.0_131"
+
+### Install KeyBox
+* download and unzip
+* add to path
+  * export PATH="$HOME/tools/KeyBox-jetty/bin:$HOME/tools/KeyBox-jetty/jetty/bin:$PATH"
+* run ```./startKeyBox.sh``` within KeyBox home folder
+* provide Database key
+* save SSH key generated from initialization to **~/.ssh/authorized_keys** file
+  * Note: this SSK key should be copied to any Linux system to which KeyBox needs to be connected
+* KeyBox will be running on **https://localhost:8443** by default
+
+### Setup Nginx to serve KeyBox
+* goto /etc/nginx folder
+* generate SSL certificate
+```
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/cert.key -out /etc/nginx/cert.crt
+```
+* open /etc/nginx/conf.d/servers.conf file
+* add [SSL Config](https://github.com/hareeshbabu82ns/docs/blob/master/nginx.md#server-with-ssl-https-and-ssh-tunnel-ex-keybox)
+* restart nginx (sudo service nginx restart)
+* replace server name to **keybox.<domain>**
+
+### Setup KeyBox via Web
+* Access KeyBox using https://keybox.hgcloud.cloudns.cc
+* configure **admin** user (initial password **changeme**)
+* add Systems, Profiles, Users
+* assign Users to Profiles and Systems to Profiles
+* login with new User and connect with System using SSH terminal over HTTPS
