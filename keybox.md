@@ -38,6 +38,33 @@ server {
 		}
 }
 ```
+## NGINX server reverse proxy config with HTTP
+* in the jetty directory edit the **start.ini** file
+* change --module=https to **--module=http**
+* and change jetty.http.port=8443 to and change **jetty.http.port=8888**
+* add config to NGINX servers.conf file to proxy for port 8888
+```
+server {                                                                                         
+        listen 80;                                                                               
+        server_name keybox.hlinode.cloudns.cc;                                                   
+        location / {                                                                             
+                proxy_http_version 1.1;                                                          
+                proxy_set_header Upgrade $http_upgrade;                                          
+                proxy_set_header Connection "upgrade";                                           
+                                                                                                 
+                proxy_set_header Host $host;                                                     
+                proxy_set_header X-Real-IP $remote_addr;                                         
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;                     
+                proxy_set_header X-Forwarded-Proto $scheme;                                      
+                                                                                                 
+                proxy_pass http://localhost:8888;                                                
+                proxy_read_timeout 1800s;                                                        
+                                                                                                 
+                proxy_redirect http://localhost:8888 http://keybox.hlinode.cloudns.cc;           
+        }                                                                                        
+}            
+```
+
 ## Apache2 server reverse proxy config
 ```
 <VirtualHost *:443>
