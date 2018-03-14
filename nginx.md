@@ -12,6 +12,12 @@ $> nginx -v
 * /etc/nginx/conf.d/* - server configurations to be included in nginx.conf
 * /etc/nginx/sites-enabled/default - base sites included in nginx.conf
 
+## Operating
+```bash
+$> sudo service nginx start
+$> service nginx reload
+$> service nginx status
+```
 
 ## Configuration
 
@@ -98,6 +104,49 @@ server {
 
 				proxy_redirect      http://localhost:8443 https://keybox.hlinode.cloudns.cc;
 		}
+}
+```
+### Web + API server config [Read More](https://medium.freecodecamp.org/an-introduction-to-nginx-for-developers-62179b6a458f)
+```
+upstream remoteApplicationServer {
+    server 10.10.10.10;
+}
+
+upstream remoteAPIServer {
+    server 20.20.20.20;
+    server 20.20.20.21;
+    server 20.20.20.22;
+    server 20.20.20.23;
+}
+
+
+server {
+    listen 80;
+    server_name www.customapp.com customapp.com
+    root /var/www/html;
+    index index.html
+
+        location / {
+            alias /var/www/html/customapp/;
+            try_files $uri $uri/ =404;
+        }
+
+        location /remoteapp {
+            proxy_set_header   Host             $host:$server_port;
+            proxy_set_header   X-Real-IP        $remote_addr;
+            proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+            proxy_pass http://remoteAPIServer/;
+        }
+
+        location /api/v1/ {
+            proxy_pass https://remoteAPIServer/api/v1/;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_cache_bypass $http_upgrade;
+            proxy_redirect http:// https://;
+        }
 }
 ```
 * [Additional Info](https://www.digitalocean.com/community/tutorials/how-to-configure-nginx-with-ssl-as-a-reverse-proxy-for-jenkins)
